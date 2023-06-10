@@ -341,6 +341,8 @@ class PlayState extends MusicBeatState
 				dialogue = CoolUtil.coolTextFile(Paths.txt('roses/rosesDialogue'));
 			case 'thorns':
 				dialogue = CoolUtil.coolTextFile(Paths.txt('thorns/thornsDialogue'));
+			case 'endurance':
+				dialogue = CoolUtil.coolTextFile(Paths.txt('data/endurance/enduranceDialogue'));
 		}
 
 		switch(SONG.stage)
@@ -666,9 +668,23 @@ class PlayState extends MusicBeatState
 								add(waveSprite);
 								add(waveSpriteFG);
 						*/
-			}
-			case 'stage':
-				{
+					}
+				case 'trackyard':
+					{
+						defaultCamZoom = 0.8;
+						curStage = 'trackyard';
+						trace('Loading trackyard BG');
+						var bg:FlxSprite = new FlxSprite(-600, -200).loadGraphic(Paths.image('track_and_yard', 'week1'));
+						if(FlxG.save.data.antialiasing)
+							{
+								bg.antialiasing = true;
+							}
+						bg.scrollFactor.set(0.9, 0.9);
+						bg.active = false;
+						add(bg);
+					}
+				default:
+					{
 						defaultCamZoom = 0.9;
 						curStage = 'stage';
 						var bg:FlxSprite = new FlxSprite(-600, -200).loadGraphic(Paths.image('stageback'));
@@ -1055,6 +1071,21 @@ class PlayState extends MusicBeatState
 					schoolIntro(doof);
 				case 'thorns':
 					schoolIntro(doof);
+				case 'endurance': //Credit to Rageminer996, basically took this code directly from Smoke 'Em Out Struggle
+					var introText:FlxSprite = new FlxSprite(-350, -200).loadGraphic(Paths.image('mareliaNote'));
+					introText.scrollFactor.set();
+					camHUD.visible = false;
+
+					add(introText);
+
+					FlxG.sound.play(Paths.sound('pageTurn'));
+
+					new WaitForKeypress([FlxKey.ENTER, FlxKey.SPACE], function() {
+						trace('Dismiss note');
+						remove(introText);
+						camHUD.visible = true;
+						schoolIntro(doof);
+					}).start();
 				default:
 					startCountdown();
 			}
@@ -1696,10 +1727,21 @@ class PlayState extends MusicBeatState
 		vocals.time = Conductor.songPosition;
 		vocals.play();
 
-		#if windows
-		DiscordClient.changePresence(detailsText + " " + SONG.song + " (" + storyDifficultyText + ") " + Ratings.GenerateLetterRank(accuracy), "\nAcc: " + HelperFunctions.truncateFloat(accuracy, 2) + "% | Score: " + songScore + " | Misses: " + misses  , iconRPC);
+		// Updating Discord Rich Presence.
+		DiscordClient.changePresence(detailsText
+			+ " "
+			+ SONG.song
+			+ " ("
+			+ storyDifficultyText
+			+ ") "
+			+ Ratings.GenerateLetterRank(accuracy),
+			"\nAcc: "
+			+ HelperFunctions.truncateFloat(accuracy, 2)
+			+ "% | Score: "
+			+ songScore
+			+ " | Misses: "
+			+ misses, iconRPC);
 		#end
-	}
 
 	private var paused:Bool = false;
 	var startedCountdown:Bool = false;
